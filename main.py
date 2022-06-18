@@ -1,6 +1,7 @@
 import concurrent.futures
 
 import flask
+
 from google.cloud import bigquery
 
 
@@ -10,41 +11,31 @@ bigquery_client = bigquery.Client()
 
 @app.route("/")
 def main():
-    query_job = bigquery_client.query(
-        """
-        SELECT
-        CONCAT(
-            'https://stackoverflow.com/questions/',
-            CAST(id as STRING)) as url,
-        view_count
-        FROM `bigquery-public-data.stackoverflow.posts_questions`
-        WHERE tags like '%google-bigquery%'
-        ORDER BY view_count DESC
-        LIMIT 10
-    """
-    )
 
-    return flask.redirect(
-        flask.url_for(
-            "results",
-            project_id=query_job.project,
-            job_id=query_job.job_id,
-            location=query_job.location,
-        )
-    )
+    return flask.render_template("home.html")
+
 
 
 @app.route("/results")
 def results():
-    project_id = flask.request.args.get("project_id")
-    job_id = flask.request.args.get("job_id")
-    location = flask.request.args.get("location")
 
-    query_job = bigquery_client.get_job(
-        job_id,
-        project=project_id,
-        location=location,
+    ingredient_query = flask.request.args.get("ingredient")
+    query = """
+           WITH dat AS (SELECT name, steps, SPLIT(ingredients_clean, "|") as ingredients FROM `plenary-line-305512.flaska_data.recipes_raw` WHERE DATE(_PARTITIONTIME) = "2022-06-18" )
+
+        SELECT name, ingredients FROM dat, UNNEST(ingredients) ingredient  WHERE CONTAINS_SUBSTR(ingredient, @ingredient)  LIMIT 20
+        """
+
+
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("ingredient", "STRING", ingredient_query),
+        ]
     )
+    query_job = bigquery_client.query(query, job_config=job_config)
+
+
+    # Make an API request.
 
     try:
         # Set a timeout because queries could take longer than one minute.
