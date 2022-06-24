@@ -7,14 +7,12 @@ from google.cloud import bigquery
 
 app = flask.Flask(__name__)
 bigquery_client = bigquery.Client()
-
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 @app.route("/")
 def main():
-
     return flask.render_template("home.html")
-
-
 
 @app.route("/results")
 def results():
@@ -40,10 +38,13 @@ def results():
     try:
         # Set a timeout because queries could take longer than one minute.
         results = query_job.result(timeout=30)
+        results_rows = [row for row in results]
+
+        print("\nresults:{}".format(results_rows))
     except concurrent.futures.TimeoutError:
         return flask.render_template("timeout.html", job_id=query_job.job_id)
 
-    return flask.render_template("query_result.html", results=results)
+    return flask.render_template("query_result.html", results=results_rows)
 
 
 if __name__ == "__main__":
