@@ -3,12 +3,10 @@ import concurrent.futures
 import flask
 
 from google.cloud import bigquery
-import os
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'application_default_credentials.json'
 
 app = flask.Flask(__name__)
-bigquery_client = bigquery.Client(project="plenary-line-305512")
+bigquery_client = bigquery.Client()
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
@@ -55,6 +53,6 @@ if __name__ == "__main__":
     # This is used when running locally only. When deploying to Google App
     # Engine, a webserver process such as Gunicorn will serve the app. This
     # can be configured by adding an `entrypoint` to app.yaml.
-    app.run(host="0.0.0.0", port=8000, debug=True)
+    app.run(host="127.0.0.1", port=8000, debug=True)
 # [END gae_python3_bigquery]
 # [END gae_python38_bigquery]
