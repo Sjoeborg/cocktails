@@ -20,7 +20,7 @@ pip install -r requirements.txt
 COPY . /code
 
 ENTRYPOINT ["python3"]
-CMD ["app.py"]
+CMD ["main.py"]
 
 FROM builder as dev-envs
 
