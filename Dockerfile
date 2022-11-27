@@ -19,14 +19,9 @@ pip install -r requirements.txt
 
 COPY . /code
 
+ENV PYTHONPATH "${PYTHONPATH}:/code"
+
 ENTRYPOINT ["python3"]
 CMD ["main.py"]
 
 FROM builder as dev-envs
-
-RUN <<EOF
-addgroup -S docker
-adduser -S --shell /bin/bash --ingroup docker vscode
-EOF
-# install Docker tools (cli, buildx, compose)
-COPY --from=gloursdocker/docker / /

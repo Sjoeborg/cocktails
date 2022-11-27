@@ -3,3 +3,6 @@ build:
 	docker build -t flaska .
 run:
 	docker compose up -d
+
+teardown:
+	docker compose down
